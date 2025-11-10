@@ -1,18 +1,24 @@
-name: "snyk test"
+name: Snyk Security Scan
+
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+
 jobs:
-  build:
+  security:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: snyk/actions/setup@master
-      - name: Snyk Test
-        run: snyk test --sarif-file-output=snyk-sarif1.json
-        continue-on-error: true
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Snyk CLI
+        uses: snyk/actions/setup@master
+
+      - name: Snyk test
         env:
-           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk test --severity-threshold=high
