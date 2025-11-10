@@ -1,4 +1,4 @@
-name: "snyk test"
+name: Snyk Security Scan
 
 on:
   push:
@@ -8,13 +8,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  security:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: snyk/actions/setup@master
 
-      - name: Snyk Test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Snyk CLI
+        uses: snyk/actions/setup@master
+
+      - name: Snyk test (CI gate)
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk test --org=darrs21 --sarif-file-output=snyk-sarif1.json --severity-threshold=high
+        run: snyk test --org=darrs21 --severity-threshold=high
+
+      - name: Snyk monitor (snapshot)
+        if: always()
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk monitor --org=darrs21 --project-name=nodejs-goof-github-actions-demo
